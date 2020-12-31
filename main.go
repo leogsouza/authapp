@@ -1,7 +1,9 @@
 package main
 
 import (
+	"authapp/controllers"
 	"authapp/database"
+	"authapp/middlewares"
 	"authapp/models"
 	"log"
 
@@ -14,6 +16,20 @@ func setupRouter() *gin.Engine {
 	r.GET("/ping", func(c *gin.Context) {
 		c.String(200, "pong")
 	})
+
+	api := r.Group("/api")
+	{
+		public := api.Group("/public")
+		{
+			public.POST("/login", controllers.Login)
+			public.POST("/signup", controllers.Signup)
+		}
+
+		protected := api.Group("/protected").Use(middlewares.Authz())
+		{
+			protected.GET("/profile", controllers.Profile)
+		}
+	}
 
 	return r
 }
